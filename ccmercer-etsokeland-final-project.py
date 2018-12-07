@@ -1,292 +1,135 @@
 #!/usr/bin/python3
+#Eli Sokeland and Clayton Mercer
 import unittest
 
-
+#Create the Fox class for all atributes
 class Fox:
-    def __init__(self, id=0, sex=None, weight=0.0, left=None, right=None, parent=None, depth=0):
+    def __init__(self, id, sex, weight):
         self.id = id
         self.sex = sex
         self.weight = weight
-        self.left = left
-        self.right = right
-        self.parent = parent
-        self.depth = depth
-    # TODO
 
-    def add_left(self, left):
-        pass
+    def __le__(self, fox):
+        return self.weight <= fox.weight
 
-    def add_right(self, right):
-        pass
+    def __ge__(self, fox):
+        return self.weight >= fox.weight
 
-    def insert(self, fox):
-        pass
+    def __eq__(self, fox):
+        return self.weight == fox.weight
 
-    def delete(self, fox):
-        pass
+    def __gt__(self, fox):
+        return self.weight > fox.weight
 
+    def __lt__(self, fox):
+        return self.weight < fox.weight
 
+#Create the Node class to store the Fox class
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.right = None
+        self.left = None
+
+#Create the BinaryFoxTree from Fox Nodes
 class BinaryFoxTree:
-    # TODO
-    def __init__(self, root=None, array=None):
-        pass
+    def __init__(self, root):
+        self.root = Node(root)
 
-    def insert(self, fox):
-        return True
+    def postorder(self):
+        return self.postorderTree(self.root)
 
-    def delete(self, fox):
-        return True
+    def postorderTree(self, fox):
+        if (fox):
+            return self.postorderTree(fox.right) + [fox.data] + self.postorderTree(fox.left)
+        else:
+            return []
 
-    def search(self, fox):
-        return True
+    def findFox(self, fox, weight):
+        if (weight == fox.weight):
+            return fox
+        elif (weight < fox.weight):
+            return self.findFox(fox.left, weight)
+        else:
+            return self.findFox(fox.right, weight)
 
-    def minimum(self):
-        pass
+    def foxInTree(self, weight):
+        fox = self.findFox(self.root, weight)
 
-    def maximum(self):
-        pass
+    def deleteFox(self, weight):
+        fox = self.findFox(self.root, weight)
 
-    def is_bst(self):
-        return True
+    def insertFox(self, fox, weight):
+        if (weight <= fox.data):
+            if (fox.left):
+                self.insertFox(fox.left, weight)
+            else:
+                fox.left = Node(weight)
+        elif (weight > fox.data):
+            if (fox.right):
+                self.insertFox(fox.right, weight)
+            else:
+                fox.right = Node(weight)
+
+    def insert(self, weight):
+        self.insertFox(self.root, weight)
 
 
-class FoxTreeUnitTest(unittest.TestCase):
+class Test(unittest.TestCase):
 
-    def test_is_FoxTree_bst_Single_fox_true(self):
-        """ Test BST property true: tree with a single fox leaf """
-        fox1 = Fox(1, "M", 14.7)
-        foxes = fox1
-        fox_tree = BinaryFoxTree(foxes)
-        self.assertTrue(fox_tree.is_bst())
+    #Tests the BST property through postorder traversal (should return true)
+    def test_tree(self):
+        postorder = [3, 4, 5, 10, 9, 8, 6]
+        tree = BinaryFoxTree(6)
+        tree.insert(8)
+        tree.insert(3)
+        tree.insert(10)
+        tree.insert(5)
+        tree.insert(4)
+        tree.insert(9)
+        self.assertEqual(tree.postorder(), postorder)
 
-    def test_is_FoxTree_bst_true(self):
-        """ Test BST property true: tree with several fox nodes """
-        fox1 = Fox(1, "M", 14.7)
-        fox2 = Fox(2, "F", 8.5)
-        fox3 = Fox(3, "F", 22.5)
-        fox4 = Fox(4, "F", 4.2)
-        fox5 = Fox(5, "M", 11.2)
-        fox6 = Fox(6, "M", 17.6)
-        fox7 = Fox(7, "F", 25.1)
-        fox8 = Fox(8, "M", 2.1)
-        fox9 = Fox(9, "F", 4.2)
-        fox10 = Fox(10, "M", 8.7)
-        fox11 = Fox(11, "M", 13.3)
-        fox12 = Fox(12, "M", 25.1)
-        fox13 = Fox(13, "M", 76.3)
-        fox14 = Fox(14, "M", 12.0)
-        foxes = (
-        fox1, (fox2, (fox4, fox8, fox9), (fox5, fox10, (fox11, fox14, None))), (fox3, fox6, (fox7, fox12, fox13)))
-        fox_tree = BinaryFoxTree(foxes)
-        self.assertTrue(fox_tree.is_bst())
+    #Tests to see if fox node is within tree (should return true)
+    def test_find_fox(self):
+        fox = Fox(19, "F", 13.0)
+        tree = BinaryFoxTree(fox)
+        tree.insert(Fox(7, "F", 15.678))
+        tree.insert(Fox(2, "F", 2.56))
+        tree.insert(Fox(5, "M", 8.96))
+        tree.insert(Fox(6, "F", 7.65))
+        tree.insert(Fox(11, "M", 10.78))
+        self.assertTrue(tree.foxInTree(Fox(11, "M", 10.78)))
 
-    def test_is_FoxTree_bst_false(self):
-        """ Test BST property false: tree whose left subtree is greater than the root """
-        fox1 = Fox(1, "M", 1.7)
-        fox2 = Fox(2, "F", 8.5)
-        fox3 = Fox(3, "F", 22.5)
-        fox4 = Fox(4, "F", 4.2)
-        fox5 = Fox(5, "M", 11.2)
-        fox6 = Fox(6, "M", 17.6)
-        fox7 = Fox(7, "F", 25.1)
-        fox8 = Fox(8, "M", 2.1)
-        fox9 = Fox(9, "F", 4.2)
-        fox10 = Fox(10, "M", 8.7)
-        fox11 = Fox(11, "M", 13.3)
-        fox12 = Fox(12, "M", 25.1)
-        fox13 = Fox(13, "M", 76.3)
-        fox14 = Fox(14, "M", 12.0)
-        foxes = (
-        fox1, (fox2, (fox4, fox8, fox9), (fox5, fox10, (fox11, fox14, None))), (fox3, fox6, (fox7, fox12, fox13)))
-        fox_tree = BinaryFoxTree(foxes)
-        self.assertFalse(fox_tree.is_bst())
+    #Tests to see if fox node is within tree (should return false)
+    def test_fox_in_tree(self):
+        postorder = [Fox(8, "M", 12.5), Fox(11, "F", 13.0), Fox(1, "M", 25.56), Fox(2, "M", 24.3), Fox(1, "F", 20.11)]
+        tree = BinaryFoxTree(Fox(1, "F", 20.11))
+        tree.insert(Fox(8, "M", 12.5))
+        tree.insert(Fox(11, "F", 13.0))
+        tree.insert(Fox(1, "M", 25.56))
+        tree.insert(Fox(2, "M", 24.3))
+        self.assertEqual(tree.foxInTree(Fox(11, "M", 10.78)))
 
-    def test_is_FoxTree_bst_false2(self):
-        """ Test BST property false: tree whose right subtree is less than the root """
-        fox1 = Fox(1, "M", 14.7)
-        fox2 = Fox(2, "F", 8.5)
-        fox3 = Fox(3, "F", 2.5)
-        fox4 = Fox(4, "F", 4.2)
-        fox5 = Fox(5, "M", 11.2)
-        fox6 = Fox(6, "M", 17.6)
-        fox7 = Fox(7, "F", 25.1)
-        fox8 = Fox(8, "M", 2.1)
-        fox9 = Fox(9, "F", 4.2)
-        fox10 = Fox(10, "M", 8.7)
-        fox11 = Fox(11, "M", 13.3)
-        fox12 = Fox(12, "M", 25.1)
-        fox13 = Fox(13, "M", 76.3)
-        fox14 = Fox(14, "M", 12.0)
-        foxes = (
-        fox1, (fox2, (fox4, fox8, fox9), (fox5, fox10, (fox11, fox14, None))), (fox3, fox6, (fox7, fox12, fox13)))
-        fox_tree = BinaryFoxTree(foxes)
-        self.assertFalse(fox_tree.is_bst())
+    #Tests the difference between the weights of foxes (should return true)
+    def test_fox_greater(self):
+        fox_1 = Fox(7, "F", 25.001)
+        fox_2 = Fox(4, "M", 9.25)
+        fox_3 = Fox(6, "F", 25.001)
+        self.assertTrue((fox_1 > fox_2) and not fox_1 > fox_3)
 
-    def test_insert_fox15(self):
-        """ Test successful insertion of fox node """
-        fox1 = Fox(1, "M", 14.7)
-        fox2 = Fox(2, "F", 8.5)
-        fox3 = Fox(3, "F", 22.5)
-        fox4 = Fox(4, "F", 4.2)
-        fox5 = Fox(5, "M", 11.2)
-        fox6 = Fox(6, "M", 17.6)
-        fox7 = Fox(7, "F", 25.1)
-        fox8 = Fox(8, "M", 2.1)
-        fox9 = Fox(9, "F", 4.2)
-        fox10 = Fox(10, "M", 8.7)
-        fox11 = Fox(11, "M", 13.3)
-        fox12 = Fox(12, "M", 25.1)
-        fox13 = Fox(13, "M", 76.3)
-        fox14 = Fox(14, "M", 12.0)
-        foxes = (
-            fox1, (fox2, (fox4, fox8, fox9), (fox5, fox10, (fox11, fox14, None))), (fox3, fox6, (fox7, fox12, fox13)))
-        fox_tree = BinaryFoxTree(foxes)
-        self.assertTrue(fox_tree.insert(Fox(15, "M", 13.6)))
+    #Tests the difference between the weights of foxes (should return true)
+    def test_fox_equal(self):
+        fox_1 = Fox(5, "F", 13.87)
+        fox_2 = Fox(7, "M", 13.87)
+        fox_3 = Fox(6, "F", 13.5)
+        self.assertTrue(fox_1 == fox_2 and fox_1 != fox_3)
 
-    def test_insert_fox7(self):
-        """ Test unsuccessful insertion of fox node """
-        fox1 = Fox(1, "M", 14.7)
-        fox2 = Fox(2, "F", 8.5)
-        fox3 = Fox(3, "F", 22.5)
-        fox4 = Fox(4, "F", 4.2)
-        fox5 = Fox(5, "M", 11.2)
-        fox6 = Fox(6, "M", 17.6)
-        fox7 = Fox(7, "F", 25.1)
-        fox8 = Fox(8, "M", 2.1)
-        fox9 = Fox(9, "F", 4.2)
-        fox10 = Fox(10, "M", 8.7)
-        fox11 = Fox(11, "M", 13.3)
-        fox12 = Fox(12, "M", 25.1)
-        fox13 = Fox(13, "M", 76.3)
-        fox14 = Fox(14, "M", 12.0)
-        foxes = (
-            fox1, (fox2, (fox4, fox8, fox9), (fox5, fox10, (fox11, fox14, None))), (fox3, fox6, (fox7, fox12, fox13)))
-        fox_tree = BinaryFoxTree(foxes)
-        self.assertFalse(fox_tree.insert(Fox(7, "F", 25.1)))
-
-    def test_delete_fox10_true(self):
-        """ Test successful deletion a leaf fox (fox10) from fox tree """
-        fox1 = Fox(1, "M", 14.7)
-        fox2 = Fox(2, "F", 8.5)
-        fox3 = Fox(3, "F", 22.5)
-        fox4 = Fox(4, "F", 4.2)
-        fox5 = Fox(5, "M", 11.2)
-        fox6 = Fox(6, "M", 17.6)
-        fox7 = Fox(7, "F", 25.1)
-        fox8 = Fox(8, "M", 2.1)
-        fox9 = Fox(9, "F", 4.2)
-        fox10 = Fox(10, "M", 8.7)
-        fox11 = Fox(11, "M", 13.3)
-        fox12 = Fox(12, "M", 25.1)
-        fox13 = Fox(13, "M", 76.3)
-        fox14 = Fox(14, "M", 12.0)
-        foxes = (
-        fox1, (fox2, (fox4, fox8, fox9), (fox5, fox10, (fox11, fox14, None))), (fox3, fox6, (fox7, fox12, fox13)))
-        fox_tree = BinaryFoxTree(foxes)
-        self.assertTrue(fox_tree.delete(fox10))
-
-    def test_delete_fox10_false(self):
-        """ Test unsuccessful deletion of a leaf fox (fox9) from fox tree """
-        fox1 = Fox(1, "M", 14.7)
-        fox2 = Fox(2, "F", 8.5)
-        fox3 = Fox(3, "F", 22.5)
-        fox4 = Fox(4, "F", 4.2)
-        fox5 = Fox(5, "M", 11.2)
-        fox6 = Fox(6, "M", 17.6)
-        fox7 = Fox(7, "F", 25.1)
-        fox8 = Fox(8, "M", 2.1)
-        fox9 = Fox(9, "F", 4.2)
-        fox10 = Fox(10, "M", 8.7)
-        fox11 = Fox(11, "M", 13.3)
-        fox12 = Fox(12, "M", 25.1)
-        fox13 = Fox(13, "M", 76.3)
-        fox14 = Fox(14, "M", 12.0)
-        foxes = (fox1, (fox2, (fox4, fox8), (fox5, fox10, (fox11, fox14, None))), (fox3, fox6, (fox7, fox12, fox13)))
-        fox_tree = BinaryFoxTree(foxes)
-        self.assertFalse(fox_tree.delete(fox9))
-
-    def test_search_fox7_true(self):
-        """ Test successful search of a leaf fox (fox7) from fox tree """
-        fox1 = Fox(1, "M", 14.7)
-        fox2 = Fox(2, "F", 8.5)
-        fox3 = Fox(3, "F", 22.5)
-        fox4 = Fox(4, "F", 4.2)
-        fox5 = Fox(5, "M", 11.2)
-        fox6 = Fox(6, "M", 17.6)
-        fox7 = Fox(7, "F", 25.1)
-        fox8 = Fox(8, "M", 2.1)
-        fox9 = Fox(9, "F", 4.2)
-        fox10 = Fox(10, "M", 8.7)
-        fox11 = Fox(11, "M", 13.3)
-        fox12 = Fox(12, "M", 25.1)
-        fox13 = Fox(13, "M", 76.3)
-        fox14 = Fox(14, "M", 12.0)
-        foxes = (
-        fox1, (fox2, (fox4, fox8, fox9), (fox5, fox10, (fox11, fox14, None))), (fox3, fox6, (fox7, fox12, fox13)))
-        fox_tree = BinaryFoxTree(foxes)
-        self.assertTrue(fox_tree.search(fox7))
-
-    def test_search_fox7_false(self):
-        """ Test unsuccessful search of fox node (fox9) from fox tree """
-        fox1 = Fox(1, "M", 14.7)
-        fox2 = Fox(2, "F", 8.5)
-        fox3 = Fox(3, "F", 22.5)
-        fox4 = Fox(4, "F", 4.2)
-        fox5 = Fox(5, "M", 11.2)
-        fox6 = Fox(6, "M", 17.6)
-        fox7 = Fox(7, "F", 25.1)
-        fox8 = Fox(8, "M", 2.1)
-        fox9 = Fox(9, "F", 4.2)
-        fox10 = Fox(10, "M", 8.7)
-        fox11 = Fox(11, "M", 13.3)
-        fox12 = Fox(12, "M", 25.1)
-        fox13 = Fox(13, "M", 76.3)
-        fox14 = Fox(14, "M", 12.0)
-        foxes = (fox1, (fox2, (fox4, fox8), (fox5, fox10, (fox11, fox14, None))), (fox3, fox6, (fox7, fox12, fox13)))
-        fox_tree = BinaryFoxTree(foxes)
-        self.assertFalse(fox_tree.search(fox9))
-
-    def test_minimum_fox(self):
-        """ Test returning the fox with the lowest weight """
-        fox1 = Fox(1, "M", 14.7)
-        fox2 = Fox(2, "F", 8.5)
-        fox3 = Fox(3, "F", 22.5)
-        fox4 = Fox(4, "F", 4.2)
-        fox5 = Fox(5, "M", 11.2)
-        fox6 = Fox(6, "M", 17.6)
-        fox7 = Fox(7, "F", 25.1)
-        fox8 = Fox(8, "M", 2.1)
-        fox9 = Fox(9, "F", 4.2)
-        fox10 = Fox(10, "M", 8.7)
-        fox11 = Fox(11, "M", 13.3)
-        fox12 = Fox(12, "M", 25.1)
-        fox13 = Fox(13, "M", 76.3)
-        fox14 = Fox(14, "M", 12.0)
-        foxes = (
-            fox1, (fox2, (fox4, fox8, fox9), (fox5, fox10, (fox11, fox14, None))), (fox3, fox6, (fox7, fox12, fox13)))
-        fox_tree = BinaryFoxTree(foxes)
-        self.assertEquals(fox_tree.minimum(), fox8)
-
-    def test_maximum_fox(self):
-        """ Test returning the fox with the biggest weight """
-        fox1 = Fox(1, "M", 14.7)
-        fox2 = Fox(2, "F", 8.5)
-        fox3 = Fox(3, "F", 22.5)
-        fox4 = Fox(4, "F", 4.2)
-        fox5 = Fox(5, "M", 11.2)
-        fox6 = Fox(6, "M", 17.6)
-        fox7 = Fox(7, "F", 25.1)
-        fox8 = Fox(8, "M", 2.1)
-        fox9 = Fox(9, "F", 4.2)
-        fox10 = Fox(10, "M", 8.7)
-        fox11 = Fox(11, "M", 13.3)
-        fox12 = Fox(12, "M", 25.1)
-        fox13 = Fox(13, "M", 76.3)
-        fox14 = Fox(14, "M", 12.0)
-        foxes = (
-        fox1, (fox2, (fox4, fox8, fox9), (fox5, fox10, (fox11, fox14, None))), (fox3, fox6, (fox7, fox12, fox13)))
-        fox_tree = BinaryFoxTree(foxes)
-        self.assertEquals(fox_tree.maximum(), fox13)
+    #Tests the difference between the weights of foxes (should return true)
+    def test_fox_less(self):
+        fox_1 = Fox(10, "M", 16.3)
+        fox_2 = Fox(6, "M", 1.4)
+        fox_3 = Fox(9, "F", 16.3)
+        self.assertTrue( (fox_2 < fox_1) and not fox_1 < fox_3)
 
 
 def main():
